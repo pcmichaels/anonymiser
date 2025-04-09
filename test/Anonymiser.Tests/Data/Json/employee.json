@@ -1,0 +1,11 @@
+{
+  "employeeId": "EMP54321",
+  "name": "Jane Doe",
+  "email": "jane.doe@company.com",
+  "address": "456 Park Avenue, New York, USA",
+  "phone": "+1 212 555 1234",
+  "nationalInsuranceNumber": "CD987654E",
+  "department": "Engineering",
+  "salary": 75000,
+  "startDate": "2015-06-01"
+} 

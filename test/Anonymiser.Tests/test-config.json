@@ -1,0 +1,22 @@
+{
+  "DataLocation": "Data",
+  "AnonymiseSeed": "test-seed",
+  "Properties": [
+    {
+      "Name": "Name",
+      "Consistent": true
+    },
+    {
+      "Name": "Email",
+      "Consistent": true
+    },
+    {
+      "Name": "customerName",
+      "Consistent": true
+    },
+    {
+      "Name": "customerEmail",
+      "Consistent": true
+    }
+  ]
+} 

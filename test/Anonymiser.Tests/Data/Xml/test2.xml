@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root>
+    <Name>John Doe</Name>
+    <Email>john.doe@example.com</Email>
+    <customerName>Bob Johnson</customerName>
+    <customerEmail>bob.johnson@example.com</customerEmail>
+    <OtherField>Different data</OtherField>
+</Root> 

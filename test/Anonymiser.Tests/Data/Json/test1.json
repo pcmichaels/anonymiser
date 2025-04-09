@@ -1,0 +1,7 @@
+{
+    "Name": "John Doe",
+    "Email": "john.doe@example.com",
+    "customerName": "Jane Smith",
+    "customerEmail": "jane.smith@example.com",
+    "OtherField": "Some other data"
+} 

@@ -1,0 +1,9 @@
+{
+  "customerId": "CUST12345",
+  "name": "John Smith",
+  "email": "john.smith@example.com",
+  "address": "123 Main Street, London, UK",
+  "phone": "+44 20 7123 4567",
+  "nationalInsuranceNumber": "AB123456C",
+  "dateOfBirth": "1980-01-15"
+} 

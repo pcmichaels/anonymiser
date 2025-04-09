@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customer>
+  <customerId>CUST12345</customerId>
+  <name>John Smith</name>
+  <email>john.smith@example.com</email>
+  <address>123 Main Street, London, UK</address>
+  <phone>+44 20 7123 4567</phone>
+  <nationalInsuranceNumber>AB123456C</nationalInsuranceNumber>
+  <dateOfBirth>1980-01-15</dateOfBirth>
+</customer> 

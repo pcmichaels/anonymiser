@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<order>
+  <orderId>ORD98765</orderId>
+  <customerEmail>john.smith@example.com</customerEmail>
+  <customerName>John Smith</customerName>
+  <shippingAddress>123 Main Street, London, UK</shippingAddress>
+  <billingAddress>123 Main Street, London, UK</billingAddress>
+  <items>
+    <item>
+      <productId>PROD001</productId>
+      <name>Laptop</name>
+      <price>999.99</price>
+    </item>
+    <item>
+      <productId>PROD002</productId>
+      <name>Mouse</name>
+      <price>29.99</price>
+    </item>
+  </items>
+  <totalAmount>1029.98</totalAmount>
+</order> 

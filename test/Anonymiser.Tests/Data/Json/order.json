@@ -1,0 +1,20 @@
+{
+  "orderId": "ORD98765",
+  "customerEmail": "john.smith@example.com",
+  "customerName": "John Smith",
+  "shippingAddress": "123 Main Street, London, UK",
+  "billingAddress": "123 Main Street, London, UK",
+  "items": [
+    {
+      "productId": "PROD001",
+      "name": "Laptop",
+      "price": 999.99
+    },
+    {
+      "productId": "PROD002",
+      "name": "Mouse",
+      "price": 29.99
+    }
+  ],
+  "totalAmount": 1029.98
+} 
