@@ -1,0 +1,26 @@
+{
+    "DataLocation": ".",
+    "AnonymiseSeed": "test-seed-123",
+    "PropertiesToAnonymise": [
+        {
+            "PropertyName": "Name",
+            "AnonymisationType": "Mask",
+            "IsConsistent": true
+        },
+        {
+            "PropertyName": "Email",
+            "AnonymisationType": "Mask",
+            "IsConsistent": true
+        },
+        {
+            "PropertyName": "customerName",
+            "AnonymisationType": "Mask",
+            "IsConsistent": true
+        },
+        {
+            "PropertyName": "customerEmail",
+            "AnonymisationType": "Mask",
+            "IsConsistent": true
+        }
+    ]
+} 

@@ -20,13 +20,16 @@ namespace Anonymiser.Strategies
             return _valueAnonymisationStrategy.Anonymise(value, isConsistent);
         }
 
-        public async Task<string> AnonymiseXmlAsync(string xmlContent, AnonymisationConfig config)
+        public Task<string> AnonymiseXmlAsync(string xmlContent, AnonymisationConfig config)
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xmlContent);
             var root = xmlDoc.DocumentElement;
-            AnonymiseXmlElement(root, config);
-            return xmlDoc.OuterXml;
+            if (root != null)
+            {
+                AnonymiseXmlElement(root, config);
+            }
+            return Task.FromResult(xmlDoc.OuterXml);
         }
 
         private void AnonymiseXmlElement(XmlElement element, AnonymisationConfig config)
@@ -37,7 +40,7 @@ namespace Anonymiser.Strategies
                 {
                     AnonymiseXmlElement(childElement, config);
                 }
-                else if (child is XmlText textNode)
+                else if (child is XmlText textNode && textNode.Value != null)
                 {
                     var propertyConfig = config.PropertiesToAnonymise.Find(p => 
                         p.PropertyName.Equals(element.Name, StringComparison.OrdinalIgnoreCase));

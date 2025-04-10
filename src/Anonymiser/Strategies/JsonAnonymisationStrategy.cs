@@ -21,20 +21,20 @@ namespace Anonymiser.Strategies
             return _valueAnonymisationStrategy.Anonymise(value, isConsistent);
         }
 
-        public async Task<string> AnonymiseJsonAsync(string jsonContent, AnonymisationConfig config)
+        public Task<string> AnonymiseJsonAsync(string jsonContent, AnonymisationConfig config)
         {
             using var doc = JsonDocument.Parse(jsonContent);
             var root = doc.RootElement;
             var anonymisedJson = AnonymiseJsonElement(root, config);
-            return JsonSerializer.Serialize(anonymisedJson);
+            return Task.FromResult(JsonSerializer.Serialize(anonymisedJson));
         }
 
-        private object AnonymiseJsonElement(JsonElement element, AnonymisationConfig config)
+        private object? AnonymiseJsonElement(JsonElement element, AnonymisationConfig config)
         {
             switch (element.ValueKind)
             {
                 case JsonValueKind.Object:
-                    var obj = new Dictionary<string, object>();
+                    var obj = new Dictionary<string, object?>();
                     foreach (var property in element.EnumerateObject())
                     {
                         var propertyConfig = config.PropertiesToAnonymise.Find(p => 
@@ -42,9 +42,17 @@ namespace Anonymiser.Strategies
 
                         if (propertyConfig != null)
                         {
-                            obj[property.Name] = _valueAnonymisationStrategy.Anonymise(
-                                property.Value.GetString(), 
-                                propertyConfig.IsConsistent);
+                            var stringValue = property.Value.GetString();
+                            if (stringValue != null)
+                            {
+                                obj[property.Name] = _valueAnonymisationStrategy.Anonymise(
+                                    stringValue, 
+                                    propertyConfig.IsConsistent);
+                            }
+                            else
+                            {
+                                obj[property.Name] = null;
+                            }
                         }
                         else
                         {
@@ -54,7 +62,7 @@ namespace Anonymiser.Strategies
                     return obj;
 
                 case JsonValueKind.Array:
-                    var array = new List<object>();
+                    var array = new List<object?>();
                     foreach (var item in element.EnumerateArray())
                     {
                         array.Add(AnonymiseJsonElement(item, config));

@@ -1,5 +1,6 @@
 using Anonymiser;
 using Anonymiser.Models.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Anonymiser.TestRunner;
 
@@ -12,8 +13,30 @@ public class Program
             Console.WriteLine("Anonymiser Test Runner");
             Console.WriteLine("=====================");
 
-            // Initialize anonymiser with config
-            var anonymiser = new Anonymiser("config.json");
+            // Build configuration
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true)
+                .Build();
+
+            // Get config path from args or use default
+            var configPath = args.Length > 0 ? args[0] : null;
+            
+            // Initialize anonymiser
+            Anonymiser anonymiser;
+            if (configPath != null)
+            {
+                anonymiser = new Anonymiser(configPath);
+            }
+            else
+            {
+                var config = configuration.Get<AnonymisationConfig>();
+                if (config == null)
+                {
+                    throw new InvalidOperationException("No configuration found. Please provide a config file or ensure appsettings.json exists.");
+                }
+                anonymiser = new Anonymiser(config);
+            }
 
             // Test JSON anonymization
             Console.WriteLine("\nTesting JSON anonymization...");

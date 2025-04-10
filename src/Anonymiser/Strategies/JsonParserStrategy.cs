@@ -24,16 +24,16 @@ namespace Anonymiser.Strategies
             }
         }
 
-        public async Task<ParserResult<object>> ParseAsync(string content)
+        public Task<ParserResult<object>> ParseAsync(string content)
         {
             try
             {
                 var document = JsonDocument.Parse(content);
-                return ParserResult<object>.Success(document);
+                return Task.FromResult(ParserResult<object>.Success(document));
             }
             catch (Exception ex)
             {
-                return ParserResult<object>.Failure($"Failed to parse JSON: {ex.Message}");
+                return Task.FromResult(ParserResult<object>.Failure($"Failed to parse JSON: {ex.Message}"));
             }
         }
     }
