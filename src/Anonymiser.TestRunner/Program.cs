@@ -75,6 +75,20 @@ public class Program
             Console.WriteLine("\nAnonymised XML:");
             Console.WriteLine(anonymisedXml);
 
+            // Test CSV anonymization
+            Console.WriteLine("\nTesting CSV anonymization...");
+            var csvContent = """
+                Name,Email,customerName,customerEmail,OtherField
+                John Doe,john.doe@example.com,Jane Smith,jane.smith@example.com,Some other data
+                Bob Johnson,bob.johnson@example.com,Alice Brown,alice.brown@example.com,Different data
+                """;
+
+            var anonymisedCsv = await anonymiser.AnonymiseCsvAsync(csvContent);
+            Console.WriteLine("Original CSV:");
+            Console.WriteLine(csvContent);
+            Console.WriteLine("\nAnonymised CSV:");
+            Console.WriteLine(anonymisedCsv);
+
             // Test consistency
             Console.WriteLine("\nTesting consistency...");
             var secondJsonContent = """

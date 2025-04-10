@@ -24,11 +24,11 @@ namespace Anonymiser.Tests
         {
             // Arrange
             var inputJson = @"{
-                ""Email"": ""test@example.com"",
-                ""Name"": ""John Doe"",
-                ""Address"": ""123 Main St"",
-                ""Sex"": ""Male"",
-                ""Gender"": ""Male""
+                ""email"": ""test@example.com"",
+                ""name"": ""John Doe"",
+                ""address"": ""123 Main St"",
+                ""sex"": ""Male"",
+                ""gender"": ""Male""
             }";
 
             // Act
@@ -40,18 +40,18 @@ namespace Anonymiser.Tests
             var anonymised2 = JsonDocument.Parse(result2).RootElement;
 
             // Consistent fields should be the same
-            Assert.Equal(anonymised1.GetProperty("Email").GetString(), 
-                        anonymised2.GetProperty("Email").GetString());
-            Assert.Equal(anonymised1.GetProperty("Name").GetString(), 
-                        anonymised2.GetProperty("Name").GetString());
+            Assert.Equal(anonymised1.GetProperty("email").GetString(), 
+                        anonymised2.GetProperty("email").GetString());
+            Assert.Equal(anonymised1.GetProperty("name").GetString(), 
+                        anonymised2.GetProperty("name").GetString());
 
             // Non-consistent fields should be different
-            Assert.NotEqual(anonymised1.GetProperty("Address").GetString(), 
-                          anonymised2.GetProperty("Address").GetString());
-            Assert.NotEqual(anonymised1.GetProperty("Sex").GetString(), 
-                          anonymised2.GetProperty("Sex").GetString());
-            Assert.NotEqual(anonymised1.GetProperty("Gender").GetString(), 
-                          anonymised2.GetProperty("Gender").GetString());
+            Assert.NotEqual(anonymised1.GetProperty("address").GetString(), 
+                          anonymised2.GetProperty("address").GetString());
+            Assert.NotEqual(anonymised1.GetProperty("sex").GetString(), 
+                          anonymised2.GetProperty("sex").GetString());
+            Assert.NotEqual(anonymised1.GetProperty("gender").GetString(), 
+                          anonymised2.GetProperty("gender").GetString());
         }
 
         [Fact]
@@ -59,19 +59,20 @@ namespace Anonymiser.Tests
         {
             // Arrange
             var inputJson = @"{
-                ""Email"": ""test@example.com"",
-                ""Name"": ""John Doe""
+                ""email"": ""test@example.com"",
+                ""name"": ""John Doe""
             }";
 
             var overrideConfig = new AnonymisationConfig
             {
+                DataLocation = ".",
                 AnonymiseSeed = "override-seed",
                 PropertiesToAnonymise = new System.Collections.Generic.List<PropertyToAnonymise>
                 {
                     new PropertyToAnonymise 
                     { 
-                        PropertyName = "Email", 
-                        AnonymisationType = "mask", 
+                        PropertyName = "email", 
+                        AnonymisationType = "Mask", 
                         IsConsistent = true 
                     }
                 }
@@ -86,11 +87,11 @@ namespace Anonymiser.Tests
             var anonymised2 = JsonDocument.Parse(result2).RootElement;
 
             // Should be different due to different seed
-            Assert.NotEqual(anonymised1.GetProperty("Email").GetString(), 
-                          anonymised2.GetProperty("Email").GetString());
+            Assert.NotEqual(anonymised1.GetProperty("email").GetString(), 
+                          anonymised2.GetProperty("email").GetString());
 
             // Name should be preserved as it's not in override config
-            Assert.Equal("John Doe", anonymised2.GetProperty("Name").GetString());
+            Assert.Equal("John Doe", anonymised2.GetProperty("name").GetString());
         }
     }
 } 

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Anonymiser.Interfaces;
@@ -24,32 +26,48 @@ namespace Anonymiser.Strategies
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xmlContent);
+
             var root = xmlDoc.DocumentElement;
-            if (root != null)
+            if (root == null)
             {
-                AnonymiseXmlElement(root, config);
+                throw new InvalidOperationException("XML document has no root element");
             }
-            return Task.FromResult(xmlDoc.OuterXml);
+
+            AnonymiseXmlElement(root, config);
+
+            var sb = new StringBuilder();
+            using var writer = new XmlTextWriter(new StringWriter(sb));
+            xmlDoc.WriteTo(writer);
+            return Task.FromResult(sb.ToString());
         }
 
         private void AnonymiseXmlElement(XmlElement element, AnonymisationConfig config)
         {
-            foreach (XmlNode child in element.ChildNodes)
-            {
-                if (child is XmlElement childElement)
-                {
-                    AnonymiseXmlElement(childElement, config);
-                }
-                else if (child is XmlText textNode && textNode.Value != null)
-                {
-                    var propertyConfig = config.PropertiesToAnonymise.Find(p => 
-                        p.PropertyName.Equals(element.Name, StringComparison.OrdinalIgnoreCase));
+            // Check if this element should be anonymized - using exact case-sensitive match
+            var propertyConfig = config.PropertiesToAnonymise.Find(p => 
+                p.PropertyName == element.Name);
 
-                    if (propertyConfig != null)
+            // If this element should be anonymized, process its text nodes
+            if (propertyConfig != null)
+            {
+                foreach (XmlNode child in element.ChildNodes)
+                {
+                    if (child is XmlText textNode && textNode.Value != null)
                     {
                         textNode.Value = _valueAnonymisationStrategy.Anonymise(
                             textNode.Value,
                             propertyConfig.IsConsistent);
+                    }
+                }
+            }
+            else
+            {
+                // If this element should not be anonymized, process its child elements
+                foreach (XmlNode child in element.ChildNodes)
+                {
+                    if (child is XmlElement childElement)
+                    {
+                        AnonymiseXmlElement(childElement, config);
                     }
                 }
             }

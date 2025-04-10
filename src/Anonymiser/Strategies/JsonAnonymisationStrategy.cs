@@ -38,9 +38,9 @@ namespace Anonymiser.Strategies
                     foreach (var property in element.EnumerateObject())
                     {
                         var propertyConfig = config.PropertiesToAnonymise.Find(p => 
-                            p.PropertyName.Equals(property.Name, StringComparison.OrdinalIgnoreCase));
+                            p.PropertyName == property.Name);
 
-                        if (propertyConfig != null)
+                        if (propertyConfig != null && property.Value.ValueKind == JsonValueKind.String)
                         {
                             var stringValue = property.Value.GetString();
                             if (stringValue != null)

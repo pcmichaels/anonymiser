@@ -9,12 +9,12 @@ namespace Anonymiser.Strategies
     public class MaskingAnonymisationStrategy : IAnonymisationStrategy
     {
         private readonly Dictionary<string, string> _consistentMappings;
-        private readonly Random _random;
+        private readonly string _seed;
 
         public MaskingAnonymisationStrategy(string seed)
         {
             _consistentMappings = new Dictionary<string, string>();
-            _random = new Random(seed?.GetHashCode() ?? 0);
+            _seed = seed ?? string.Empty;
         }
 
         public string Anonymise(string value, bool isConsistent)
@@ -29,30 +29,62 @@ namespace Anonymiser.Strategies
                     return maskedValue;
                 }
 
-                var newMaskedValue = GenerateMaskedValue(value);
+                var newMaskedValue = GenerateConsistentMaskedValue(value);
                 _consistentMappings[value] = newMaskedValue;
                 return newMaskedValue;
             }
 
-            return GenerateMaskedValue(value);
+            return GenerateNonConsistentMaskedValue(value);
         }
 
-        private string GenerateMaskedValue(string value)
+        private string GenerateConsistentMaskedValue(string value)
         {
-            // For consistent values, use a hash of the input
-            // For non-consistent values, use random characters
             var length = value.Length;
             var result = new StringBuilder(length);
+
+            // Use the seed + value to generate a deterministic hash
+            var seedBytes = Encoding.UTF8.GetBytes(_seed + value);
+            using var sha256 = SHA256.Create();
+            var hash = sha256.ComputeHash(seedBytes);
 
             for (int i = 0; i < length; i++)
             {
                 if (char.IsLetter(value[i]))
                 {
-                    result.Append((char)('a' + _random.Next(26)));
+                    result.Append((char)('a' + (hash[i] % 26)));
                 }
                 else if (char.IsDigit(value[i]))
                 {
-                    result.Append((char)('0' + _random.Next(10)));
+                    result.Append((char)('0' + (hash[i] % 10)));
+                }
+                else
+                {
+                    result.Append(value[i]); // Preserve special characters
+                }
+            }
+
+            return result.ToString();
+        }
+
+        private string GenerateNonConsistentMaskedValue(string value)
+        {
+            var length = value.Length;
+            var result = new StringBuilder(length);
+            var bytes = new byte[length];
+
+            // Generate new random bytes each time
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+
+            for (int i = 0; i < length; i++)
+            {
+                if (char.IsLetter(value[i]))
+                {
+                    result.Append((char)('a' + (bytes[i] % 26)));
+                }
+                else if (char.IsDigit(value[i]))
+                {
+                    result.Append((char)('0' + (bytes[i] % 10)));
                 }
                 else
                 {

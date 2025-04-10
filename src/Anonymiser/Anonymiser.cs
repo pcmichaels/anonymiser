@@ -13,6 +13,7 @@ namespace Anonymiser
         private AnonymisationConfig _config;
         private readonly IJsonAnonymisationStrategy _jsonStrategy;
         private readonly IXmlAnonymisationStrategy _xmlStrategy;
+        private readonly ICsvAnonymisationStrategy _csvStrategy;
 
         public Anonymiser(string configPath)
         {
@@ -27,6 +28,7 @@ namespace Anonymiser
             var valueStrategy = new MaskingAnonymisationStrategy(_config.AnonymiseSeed);
             _jsonStrategy = new JsonAnonymisationStrategy(valueStrategy);
             _xmlStrategy = new XmlAnonymisationStrategy(valueStrategy);
+            _csvStrategy = new CsvAnonymisationStrategy(valueStrategy);
         }
 
         public Anonymiser(AnonymisationConfig config)
@@ -36,6 +38,7 @@ namespace Anonymiser
             var valueStrategy = new MaskingAnonymisationStrategy(_config.AnonymiseSeed);
             _jsonStrategy = new JsonAnonymisationStrategy(valueStrategy);
             _xmlStrategy = new XmlAnonymisationStrategy(valueStrategy);
+            _csvStrategy = new CsvAnonymisationStrategy(valueStrategy);
         }
 
         public void UpdateConfiguration(AnonymisationConfig newConfig)
@@ -45,20 +48,49 @@ namespace Anonymiser
 
         public async Task<string> AnonymiseJsonAsync(string jsonContent, AnonymisationConfig? overrideConfig = null)
         {
-            var configToUse = overrideConfig ?? _config;
-            return await _jsonStrategy.AnonymiseJsonAsync(jsonContent, configToUse);
+            if (overrideConfig != null)
+            {
+                var overrideValueStrategy = new MaskingAnonymisationStrategy(overrideConfig.AnonymiseSeed);
+                var overrideJsonStrategy = new JsonAnonymisationStrategy(overrideValueStrategy);
+                return await overrideJsonStrategy.AnonymiseJsonAsync(jsonContent, overrideConfig);
+            }
+            return await _jsonStrategy.AnonymiseJsonAsync(jsonContent, _config);
         }
 
         public async Task<string> AnonymiseXmlAsync(string xmlContent, AnonymisationConfig? overrideConfig = null)
         {
-            var configToUse = overrideConfig ?? _config;
-            return await _xmlStrategy.AnonymiseXmlAsync(xmlContent, configToUse);
+            if (overrideConfig != null)
+            {
+                var overrideValueStrategy = new MaskingAnonymisationStrategy(overrideConfig.AnonymiseSeed);
+                var overrideXmlStrategy = new XmlAnonymisationStrategy(overrideValueStrategy);
+                return await overrideXmlStrategy.AnonymiseXmlAsync(xmlContent, overrideConfig);
+            }
+            return await _xmlStrategy.AnonymiseXmlAsync(xmlContent, _config);
+        }
+
+        public async Task<string> AnonymiseCsvAsync(string csvContent, AnonymisationConfig? overrideConfig = null)
+        {
+            if (overrideConfig != null)
+            {
+                var overrideValueStrategy = new MaskingAnonymisationStrategy(overrideConfig.AnonymiseSeed);
+                var overrideCsvStrategy = new CsvAnonymisationStrategy(overrideValueStrategy);
+                return await overrideCsvStrategy.AnonymiseCsvAsync(csvContent, overrideConfig);
+            }
+            return await _csvStrategy.AnonymiseCsvAsync(csvContent, _config);
         }
 
         public async Task<string> AnonymiseFileAsync(string filePath, AnonymisationConfig? overrideConfig = null)
         {
             var content = await File.ReadAllTextAsync(filePath);
-            return await AnonymiseJsonAsync(content, overrideConfig);
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            
+            return extension switch
+            {
+                ".json" => await AnonymiseJsonAsync(content, overrideConfig),
+                ".xml" => await AnonymiseXmlAsync(content, overrideConfig),
+                ".csv" => await AnonymiseCsvAsync(content, overrideConfig),
+                _ => throw new NotSupportedException($"File extension {extension} is not supported")
+            };
         }
     }
 } 

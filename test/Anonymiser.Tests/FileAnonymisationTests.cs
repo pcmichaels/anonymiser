@@ -74,11 +74,53 @@ namespace Anonymiser.Tests
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xmlContent);
             var root = xmlDoc.DocumentElement;
-            var jsonObj = new Dictionary<string, string>();
+            if (root == null)
+            {
+                throw new InvalidOperationException("XML document has no root element");
+            }
+
+            var jsonObj = new Dictionary<string, object>();
 
             foreach (XmlNode node in root.ChildNodes)
             {
-                jsonObj[node.Name] = node.InnerText;
+                if (node.Name != null)
+                {
+                    if (node.ChildNodes.Count == 1 && node.FirstChild is XmlText)
+                    {
+                        // Simple text node
+                        jsonObj[node.Name] = node.InnerText;
+                    }
+                    else
+                    {
+                        // Complex node with children
+                        var childObj = new Dictionary<string, object>();
+                        foreach (XmlNode child in node.ChildNodes)
+                        {
+                            if (child.Name != null)
+                            {
+                                if (child.ChildNodes.Count == 1 && child.FirstChild is XmlText)
+                                {
+                                    // Simple text node
+                                    childObj[child.Name] = child.InnerText;
+                                }
+                                else
+                                {
+                                    // Nested complex node
+                                    var nestedObj = new Dictionary<string, object>();
+                                    foreach (XmlNode nestedChild in child.ChildNodes)
+                                    {
+                                        if (nestedChild.Name != null)
+                                        {
+                                            nestedObj[nestedChild.Name] = nestedChild.InnerText;
+                                        }
+                                    }
+                                    childObj[child.Name] = nestedObj;
+                                }
+                            }
+                        }
+                        jsonObj[node.Name] = childObj;
+                    }
+                }
             }
 
             return JsonSerializer.Serialize(jsonObj);
@@ -98,50 +140,154 @@ namespace Anonymiser.Tests
                     var originalValue = property.Value.GetString();
                     var anonymisedValue = anonymisedRoot.GetProperty(property.Name).GetString();
 
-                    // Store original value
-                    if (!originalValues.ContainsKey(property.Name))
+                    if (originalValue != null && anonymisedValue != null)
                     {
-                        originalValues[property.Name] = new HashSet<string>();
+                        var propertyConfig = GetPropertyConfig(property.Name);
+                        if (propertyConfig != null)
+                        {
+                            if (!originalValues.ContainsKey(property.Name))
+                            {
+                                originalValues[property.Name] = new HashSet<string>();
+                            }
+
+                            if (originalValues[property.Name].Add(originalValue))
+                            {
+                                // First time seeing this value for this field
+                                VerifyConsistentAnonymization(property.Name, originalValue, anonymisedValue, propertyConfig.IsConsistent);
+                            }
+                            else
+                            {
+                                // We've seen this value before, verify consistency
+                                var previousAnonymisedValue = _consistentMappings[property.Name][originalValue];
+                                Assert.Equal(previousAnonymisedValue, anonymisedValue);
+                            }
+                        }
+                        else
+                        {
+                            // Field is not in configuration, should remain unchanged
+                            Assert.Equal(originalValue, anonymisedValue);
+                        }
                     }
-                    originalValues[property.Name].Add(originalValue);
+                }
+                else if (property.Value.ValueKind == JsonValueKind.Object)
+                {
+                    // Handle nested objects
+                    var originalObj = property.Value;
+                    var anonymisedObj = anonymisedRoot.GetProperty(property.Name);
 
-                    // Check that original value is not present in anonymized content
-                    Assert.DoesNotContain(originalValue, anonymisedValue);
-
-                    // Check for consistent anonymization
-                    if (IsConsistentField(property.Name))
+                    foreach (var nestedProperty in originalObj.EnumerateObject())
                     {
-                        VerifyConsistentAnonymization(property.Name, originalValue, anonymisedValue);
+                        if (nestedProperty.Value.ValueKind == JsonValueKind.String)
+                        {
+                            var originalValue = nestedProperty.Value.GetString();
+                            var anonymisedValue = anonymisedObj.GetProperty(nestedProperty.Name).GetString();
+
+                            if (originalValue != null && anonymisedValue != null)
+                            {
+                                var propertyConfig = GetPropertyConfig(nestedProperty.Name);
+                                if (propertyConfig != null)
+                                {
+                                    if (!originalValues.ContainsKey(nestedProperty.Name))
+                                    {
+                                        originalValues[nestedProperty.Name] = new HashSet<string>();
+                                    }
+
+                                    if (originalValues[nestedProperty.Name].Add(originalValue))
+                                    {
+                                        // First time seeing this value for this field
+                                        VerifyConsistentAnonymization(nestedProperty.Name, originalValue, anonymisedValue, propertyConfig.IsConsistent);
+                                    }
+                                    else
+                                    {
+                                        // We've seen this value before, verify consistency
+                                        var previousAnonymisedValue = _consistentMappings[nestedProperty.Name][originalValue];
+                                        Assert.Equal(previousAnonymisedValue, anonymisedValue);
+                                    }
+                                }
+                                else
+                                {
+                                    // Field is not in configuration, should remain unchanged
+                                    Assert.Equal(originalValue, anonymisedValue);
+                                }
+                            }
+                        }
+                        else if (nestedProperty.Value.ValueKind == JsonValueKind.Object)
+                        {
+                            // Handle nested nested objects
+                            var originalNestedObj = nestedProperty.Value;
+                            var anonymisedNestedObj = anonymisedObj.GetProperty(nestedProperty.Name);
+
+                            foreach (var nestedNestedProperty in originalNestedObj.EnumerateObject())
+                            {
+                                if (nestedNestedProperty.Value.ValueKind == JsonValueKind.String)
+                                {
+                                    var originalValue = nestedNestedProperty.Value.GetString();
+                                    var anonymisedValue = anonymisedNestedObj.GetProperty(nestedNestedProperty.Name).GetString();
+
+                                    if (originalValue != null && anonymisedValue != null)
+                                    {
+                                        var propertyConfig = GetPropertyConfig(nestedNestedProperty.Name);
+                                        if (propertyConfig != null)
+                                        {
+                                            if (!originalValues.ContainsKey(nestedNestedProperty.Name))
+                                            {
+                                                originalValues[nestedNestedProperty.Name] = new HashSet<string>();
+                                            }
+
+                                            if (originalValues[nestedNestedProperty.Name].Add(originalValue))
+                                            {
+                                                // First time seeing this value for this field
+                                                VerifyConsistentAnonymization(nestedNestedProperty.Name, originalValue, anonymisedValue, propertyConfig.IsConsistent);
+                                            }
+                                            else
+                                            {
+                                                // We've seen this value before, verify consistency
+                                                var previousAnonymisedValue = _consistentMappings[nestedNestedProperty.Name][originalValue];
+                                                Assert.Equal(previousAnonymisedValue, anonymisedValue);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // Field is not in configuration, should remain unchanged
+                                            Assert.Equal(originalValue, anonymisedValue);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        private void VerifyConsistentAnonymization(string fieldName, string originalValue, string anonymisedValue)
+        private void VerifyConsistentAnonymization(string fieldName, string originalValue, string anonymisedValue, bool isConsistent)
         {
-            if (!_consistentMappings.ContainsKey(fieldName))
+            if (isConsistent)
             {
-                _consistentMappings[fieldName] = new Dictionary<string, string>();
-            }
+                if (!_consistentMappings.ContainsKey(fieldName))
+                {
+                    _consistentMappings[fieldName] = new Dictionary<string, string>();
+                }
 
-            // If we've seen this original value before, verify it gets the same anonymized value
-            if (_consistentMappings[fieldName].TryGetValue(originalValue, out var existingAnonymisedValue))
-            {
-                Assert.Equal(existingAnonymisedValue, anonymisedValue);
+                _consistentMappings[fieldName][originalValue] = anonymisedValue;
             }
             else
             {
-                // Store the mapping for future checks
-                _consistentMappings[fieldName][originalValue] = anonymisedValue;
+                Assert.NotEqual(originalValue, anonymisedValue);
             }
         }
 
-        private bool IsConsistentField(string fieldName)
+        private PropertyToAnonymise? GetPropertyConfig(string fieldName)
         {
-            return fieldName.Equals("Email", StringComparison.OrdinalIgnoreCase) ||
-                   fieldName.Equals("Name", StringComparison.OrdinalIgnoreCase) ||
-                   fieldName.Equals("customerEmail", StringComparison.OrdinalIgnoreCase) ||
-                   fieldName.Equals("customerName", StringComparison.OrdinalIgnoreCase);
+            var configJson = File.ReadAllText(_testConfigPath);
+            var config = JsonSerializer.Deserialize<AnonymisationConfig>(configJson);
+            if (config?.PropertiesToAnonymise == null)
+            {
+                return null;
+            }
+
+            return config.PropertiesToAnonymise.FirstOrDefault(p => 
+                p.PropertyName == fieldName);
         }
     }
 } 

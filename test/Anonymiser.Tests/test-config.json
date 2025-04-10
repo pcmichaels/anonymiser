@@ -1,22 +1,46 @@
 {
   "DataLocation": "Data",
   "AnonymiseSeed": "test-seed",
-  "Properties": [
+  "PropertiesToAnonymise": [
     {
-      "Name": "Name",
-      "Consistent": true
+      "PropertyName": "name",
+      "AnonymisationType": "Mask",
+      "IsConsistent": true
     },
     {
-      "Name": "Email",
-      "Consistent": true
+      "PropertyName": "email",
+      "AnonymisationType": "Mask",
+      "IsConsistent": true
     },
     {
-      "Name": "customerName",
-      "Consistent": true
+      "PropertyName": "customerName",
+      "AnonymisationType": "Mask",
+      "IsConsistent": true
     },
     {
-      "Name": "customerEmail",
-      "Consistent": true
+      "PropertyName": "customerEmail",
+      "AnonymisationType": "Mask",
+      "IsConsistent": true
+    },
+    {
+      "PropertyName": "customerId",
+      "AnonymisationType": "Mask",
+      "IsConsistent": false
+    },
+    {
+      "PropertyName": "address",
+      "AnonymisationType": "Mask",
+      "IsConsistent": false
+    },
+    {
+      "PropertyName": "sex",
+      "AnonymisationType": "Mask",
+      "IsConsistent": false
+    },
+    {
+      "PropertyName": "gender",
+      "AnonymisationType": "Mask",
+      "IsConsistent": false
     }
   ]
 } 
