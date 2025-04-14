@@ -23,10 +23,14 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restore dependencies
-      run: dotnet restore src/Anonymiser/Anonymiser.csproj
+      run: |
+        dotnet restore src/Anonymiser/Anonymiser.csproj
+        dotnet restore test/Anonymiser.Tests/Anonymiser.Tests.csproj
 
     - name: Build
-      run: dotnet build src/Anonymiser/Anonymiser.csproj --no-restore --configuration Release
+      run: |
+        dotnet build src/Anonymiser/Anonymiser.csproj --configuration Release
+        dotnet build test/Anonymiser.Tests/Anonymiser.Tests.csproj --configuration Release
 
     - name: Test
       run: dotnet test test/Anonymiser.Tests/Anonymiser.Tests.csproj --no-build --configuration Release
