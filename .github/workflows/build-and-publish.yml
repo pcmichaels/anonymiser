@@ -29,10 +29,10 @@ jobs:
         YEAR=$(date +%y)
         MONTH=$(date +%m)
         DAY=$(date +%d)
-        # Calculate build number (YYMMDD)
-        BUILD_NUMBER=$((10#$YEAR * 10000 + 10#$MONTH * 100 + 10#$DAY))
-        # Use GitHub run number as revision
-        REVISION=$(printf "%d" $GITHUB_RUN_NUMBER)
+        # Calculate build number (YYMM)
+        BUILD_NUMBER=$((10#$YEAR * 100 + 10#$MONTH))
+        # Use day and run number as revision
+        REVISION=$((10#$DAY * 100 + $GITHUB_RUN_NUMBER))
         echo "VersionNumber=1.0.$BUILD_NUMBER.$REVISION" >> $GITHUB_ENV
 
     - name: Restore dependencies
