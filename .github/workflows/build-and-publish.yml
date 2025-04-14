@@ -25,9 +25,15 @@ jobs:
     - name: Generate Version Number
       id: version
       run: |
-        DATE=$(date +%Y%m%d)
-        RUN_NUMBER=$(printf "%03d" $GITHUB_RUN_NUMBER)
-        echo "VersionNumber=1.0.$DATE.$RUN_NUMBER" >> $GITHUB_ENV
+        # Get the current date components
+        YEAR=$(date +%y)
+        MONTH=$(date +%m)
+        DAY=$(date +%d)
+        # Calculate build number (YYMMDD)
+        BUILD_NUMBER=$((10#$YEAR * 10000 + 10#$MONTH * 100 + 10#$DAY))
+        # Use GitHub run number as revision
+        REVISION=$(printf "%d" $GITHUB_RUN_NUMBER)
+        echo "VersionNumber=1.0.$BUILD_NUMBER.$REVISION" >> $GITHUB_ENV
 
     - name: Restore dependencies
       run: |
