@@ -22,6 +22,13 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
+    - name: Generate Version Number
+      id: version
+      run: |
+        DATE=$(date +%Y%m%d)
+        RUN_NUMBER=$(printf "%03d" $GITHUB_RUN_NUMBER)
+        echo "VersionNumber=1.0.$DATE.$RUN_NUMBER" >> $GITHUB_ENV
+
     - name: Restore dependencies
       run: |
         dotnet restore src/Anonymiser/Anonymiser.csproj
@@ -29,14 +36,14 @@ jobs:
 
     - name: Build
       run: |
-        dotnet build src/Anonymiser/Anonymiser.csproj --configuration Release
+        dotnet build src/Anonymiser/Anonymiser.csproj --configuration Release -p:VersionNumber=${{ env.VersionNumber }}
         dotnet build test/Anonymiser.Tests/Anonymiser.Tests.csproj --configuration Release
 
     - name: Test
       run: dotnet test test/Anonymiser.Tests/Anonymiser.Tests.csproj --no-build --configuration Release
 
     - name: Pack
-      run: dotnet pack src/Anonymiser/Anonymiser.csproj --configuration Release --no-build --output ./artifacts
+      run: dotnet pack src/Anonymiser/Anonymiser.csproj --configuration Release --no-build --output ./artifacts -p:VersionNumber=${{ env.VersionNumber }}
 
     - name: Upload NuGet package
       uses: actions/upload-artifact@v4
@@ -64,6 +71,6 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Publish to NuGet
-      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }} 

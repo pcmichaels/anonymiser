@@ -6,14 +6,16 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PackageId>Anonymiser</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>Your Name</Authors>
-    <Company>Your Company</Company>
-    <Description>A library for parsing and anonymizing JSON and XML content</Description>
+    <Version>$(VersionNumber)</Version>
+    <Authors>Paul Michaels</Authors>
+    <Company>Paul Michaels</Company>
+    <Description>A library for parsing and anonymizing JSON, XML, and CSV content</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/yourusername/Anonymiser</RepositoryUrl>
-    <PackageTags>json xml parser anonymizer</PackageTags>
+    <PackageTags>json xml csv parser anonymizer</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageOutputPath>$(MSBuildProjectDirectory)/../../artifacts</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
