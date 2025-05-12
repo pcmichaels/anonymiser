@@ -40,22 +40,20 @@ jobs:
         dotnet restore src/Anonymiser/Anonymiser.csproj
         dotnet restore test/Anonymiser.Tests/Anonymiser.Tests.csproj
 
-    - name: Build
+    - name: Build and Test
       run: |
         dotnet build src/Anonymiser/Anonymiser.csproj --configuration Release -p:VersionNumber=${{ env.VersionNumber }}
         dotnet build test/Anonymiser.Tests/Anonymiser.Tests.csproj --configuration Release
-
-    - name: Test
-      run: dotnet test test/Anonymiser.Tests/Anonymiser.Tests.csproj --no-build --configuration Release
+        dotnet test test/Anonymiser.Tests/Anonymiser.Tests.csproj --no-build --configuration Release
 
     - name: Pack
-      run: dotnet pack src/Anonymiser/Anonymiser.csproj --configuration Release --no-build --output ./artifacts -p:VersionNumber=${{ env.VersionNumber }}
+      run: dotnet pack src/Anonymiser/Anonymiser.csproj --configuration Release -p:VersionNumber=${{ env.VersionNumber }}
 
     - name: Upload NuGet package
       uses: actions/upload-artifact@v4
       with:
         name: nuget-package
-        path: ./artifacts/*.nupkg
+        path: ./artifacts/packages/*.nupkg
 
   publish:
     needs: build
@@ -69,7 +67,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: nuget-package
-        path: ./artifacts
+        path: ./artifacts/packages
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -77,6 +75,6 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Publish to NuGet
-      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./artifacts/packages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }} 

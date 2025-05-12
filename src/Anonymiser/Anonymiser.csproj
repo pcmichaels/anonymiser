@@ -15,11 +15,12 @@
     <PackageTags>json xml csv parser anonymizer</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageOutputPath>$(MSBuildProjectDirectory)/../../artifacts</PackageOutputPath>
+    <OutputPath>$(MSBuildProjectDirectory)/../../artifacts/build</OutputPath>
+    <PackageOutputPath>$(MSBuildProjectDirectory)/../../artifacts/packages</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
