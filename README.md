@@ -1,10 +1,10 @@
 # Anonymiser
 
-A .NET library for anonymizing sensitive data in JSON and XML documents while maintaining consistency across multiple files.
+A .NET library for anonymizing sensitive data in JSON, XML, and CSV documents while maintaining consistency across multiple files.
 
 ## Features
 
-- Anonymize sensitive data in JSON and XML documents
+- Anonymize sensitive data in JSON, XML, and CSV documents
 - Maintain consistent anonymization for specified fields across multiple files
 - Configurable anonymization rules
 - Support for different anonymization strategies
@@ -48,6 +48,9 @@ var anonymisedJson = await anonymiser.AnonymiseJsonAsync(jsonContent);
 
 // Anonymize XML
 var anonymisedXml = await anonymiser.AnonymiseXmlAsync(xmlContent);
+
+// Anonymize CSV
+var anonymisedCsv = await anonymiser.AnonymiseCsvAsync(csvContent);
 ```
 
 ### Configuration
@@ -129,6 +132,28 @@ Output (example):
     <customerEmail>uvw012</customerEmail>
 </Root>
 ```
+
+### CSV Anonymization
+
+Input:
+```csv
+Name,Email,Phone,Address
+John Doe,john.doe@example.com,123-456-7890,123 Main St
+Jane Smith,jane.smith@example.com,987-654-3210,456 Oak Ave
+```
+
+Output (example):
+```csv
+Name,Email,Phone,Address
+abc123,xyz789,def456,uvw012
+ghi789,jkl012,mno345,pqr678
+```
+
+Note: The CSV anonymization will:
+- Preserve the header row
+- Anonymize values in specified columns
+- Maintain consistent anonymization across multiple files
+- Handle quoted values and special characters correctly
 
 ## License
 
